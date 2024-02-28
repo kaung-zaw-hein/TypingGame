@@ -29,6 +29,7 @@ function App() {
     setCurrWordIndex(0);
     setTypedText("");
     setTypedList([]);
+    setAccuracy(100);
     if(inputRef?.current){
       inputRef.current.focus(); 
       inputRef.current.value = "";
@@ -55,21 +56,20 @@ function App() {
       // Get the expected character
       const expectedChar = textList[currWordIndex][typedText.length];
       // Check if the typed character matches the expected character
-      if (e.key === " ") {
+      if (e.key === " " || typedText.length >= textList[currWordIndex].length) {
         setCurrWordIndex((prevIndex) => prevIndex + 1);
         setTypedList((prevList) => prevList.concat(typedText));
         setTypedText("");
-        if (typedText.length === textList[currWordIndex].length) {
+        if (typedText === textList[currWordIndex]) {
           setScore((prevScore) => prevScore + 1);
         } else {
           setAccuracy((prevAccuracy) => prevAccuracy - 1);
         }
         return;
       }
+      setTypedText((prevTypedText) => prevTypedText + e.key);
       if (e.key === expectedChar) {
-        setTypedText((prevTypedText) => prevTypedText + e.key);
       } else {
-        setTypedText((prevTypedText) => prevTypedText + e.key);
         setAccuracy((prevAccuracy) => prevAccuracy - 1);
       }
     }
@@ -80,13 +80,19 @@ function App() {
     setStatus("Play Again!");
     const endTime = Date.now();
     const elapsedTime = (endTime - startTime) / 1000;
-
+  
     // Calculate Words Per Minute (WPM)
     const typedWords = typedText.trim().split(/\s+/).length;
     const currentWPM = (typedWords / elapsedTime) * 60;
     setWordsPerMinute(currentWPM.toFixed(2));
+  
+    // Calculate accuracy
+    const correctCharacters = typedList.join("").length;
+    const totalCharacters = textList.join("").length;
+    const currentAccuracy = (correctCharacters / totalCharacters) * 100;
+    setAccuracy(currentAccuracy.toFixed(2));
   };
-
+  
   useEffect(() => {
     let interval;
     if (timer > 0 && !isGameOver) {
@@ -138,7 +144,6 @@ function App() {
           <div className="flex justify-end w-full space-x-12">
           <p>Score: {score}</p>
           <p>Accuracy: {accuracy}%</p>
-          <p>Words Per Minute (WPM): {wordsPerMinute}</p>
           </div>
         </>
       ) : (
