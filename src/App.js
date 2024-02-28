@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { generate } from "random-words";
 
 function App() {
@@ -75,7 +75,7 @@ function App() {
     }
   };
 
-  const endGame = () => {
+  const endGame = useCallback(() => {
     setIsGameOver(true);
     setStatus("Play Again!");
     const endTime = Date.now();
@@ -91,7 +91,7 @@ function App() {
     const totalCharacters = textList.join("").length;
     const currentAccuracy = (correctCharacters / totalCharacters) * 100;
     setAccuracy(currentAccuracy.toFixed(2));
-  };
+  }, [ startTime, typedText, textList, typedList]);
   
   useEffect(() => {
     let interval;
@@ -104,7 +104,7 @@ function App() {
       clearInterval(interval);
     }
     return () => clearInterval(interval);
-  }, [timer, isGameOver]);
+  }, [timer, isGameOver, endGame]);
 
   return (
     <div className="flex flex-col bg-[#323437] text-neutral-200 items-start justify-center h-screen px-20 ">
